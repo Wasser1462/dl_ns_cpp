@@ -1,7 +1,6 @@
 # dl_ns_cpp
 
-A tiny command-line demo that runs a **DTLN** (dual-signal transformation LSTM) denoising pipeline on WAV files using **TensorFlow Lite**. I keep this repo mainly as a **memento of my first C++ project**—nothing more.
-
+This is my **first C++ project**, kept here **only as a personal memento**—not meant for use or maintenance.
 
 ## References
 

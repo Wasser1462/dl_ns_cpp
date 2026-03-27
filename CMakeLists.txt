@@ -1,62 +1,46 @@
-cmake_minimum_required(VERSION 3.16)
-project(DTLN_Denoise VERSION 1.0 LANGUAGES C CXX)
-
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-    execute_process(COMMAND ${CCACHE_PROGRAM} -M 2G)
-endif()
-
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fsanitize=address -fno-omit-frame-pointer")
+cmake_minimum_required(VERSION 3.13)
+project(dl_ns_cpp CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_definitions(
-    -DTF_MAJOR_VERSION=2
-    -DTF_MINOR_VERSION=6
-    -DTF_PATCH_VERSION=0
-    -DTF_VERSION_SUFFIX=""
+include_directories(
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/src
 )
 
-add_subdirectory(
-    libs/tensorflow/tensorflow/lite 
-    ${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite  
+add_executable(dtln
+  src/main.cc
+  src/RWwav.cc
+  src/dtln_process.cc
+  src/sfft.cc
 )
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SNDFILE REQUIRED sndfile)
-if(NOT SNDFILE_FOUND)
-    set(SNDFILE_INCLUDE_DIRS "/usr/include")
-    set(SNDFILE_LIBRARIES "/usr/lib64/libsndfile.so")
-    message(WARNING "Using hardcoded sndfile paths: ${SNDFILE_LIBRARIES}")
+target_compile_definitions(dtln PRIVATE
+  TF_MAJOR_VERSION=2
+  TF_MINOR_VERSION=6
+  TF_PATCH_VERSION=0
+  TF_VERSION_SUFFIX=""
+)
+
+if(FULLY_STATIC)
+  set(BUILD_SHARED_LIBS OFF)
+  set(CMAKE_SKIP_RPATH TRUE)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  target_link_options(dtln PRIVATE -static -s)
+else()
+  target_link_options(dtln PRIVATE -static-libstdc++ -static-libgcc -s)
 endif()
 
-add_executable(dtln 
-    src/dtln.cc
-    src/sfft.cc
-    src/RWwav.cc
-)
-
-target_precompile_headers(dtln PRIVATE 
-    src/stdafx.h
-)
-
-target_include_directories(dtln PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}        
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs    
-    ${SNDFILE_INCLUDE_DIRS}
-)
+set(DTLN_LIB_DIR ${CMAKE_SOURCE_DIR}/libs)
+set(TFLITE_LIB ${DTLN_LIB_DIR}/libtensorflow-lite.a)
+set(FFTW3F_LIB ${DTLN_LIB_DIR}/libfftw3f.a)
 
 target_link_libraries(dtln
-    tensorflow-lite
-    ${SNDFILE_LIBRARIES}
+  PRIVATE
+    ${TFLITE_LIB}
+    ${FFTW3F_LIB}
     pthread
     dl
+    atomic
+    m
 )
-
-target_link_options(dtln PRIVATE -fsanitize=address)
-
-install(TARGETS dtln RUNTIME DESTINATION bin)

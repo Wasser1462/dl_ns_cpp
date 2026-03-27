@@ -1,15 +1,20 @@
-#ifndef SFFT_H
-#define SFFT_H
-
-#include <vector>
+#pragma once
 #include <complex>
+#include <vector>
 
 namespace SFFT {
-    const int FFT_SIZE = 512;
-    extern int bitrev512[FFT_SIZE];
 
-    void init_bitrev();     
-    void fft_512(std::vector<std::complex<float>>& data); 
-}
+    using complexf = std::complex<float>;
+    constexpr int FFT_SIZE = 512;
 
-#endif
+    complexf* get_buf();
+    void init();
+    void cleanup();
+
+    void fft_512(complexf* data);
+    void ifft_512(complexf* data);
+
+    void fft_512(std::vector<complexf>& data);
+    void ifft_512(std::vector<complexf>& data);
+
+}  // namespace SFFT

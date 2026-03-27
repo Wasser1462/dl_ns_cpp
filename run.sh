@@ -1,14 +1,27 @@
 #!/bin/bash
+# AArch64 cross-build only
+set -e
 
+export TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-14.2.rel1-x86_64-aarch64-none-linux-gnu"
+export PATH="${TOOLCHAIN_PATH}/bin:${PATH}"
 
-TF_LIB_PATH="/data/zengyongwang/dtln_c/libs/tensorflow/tensorflow/lite"
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+BUILD="${ROOT}/build"
 
-g++ -v debug.cc \
-  -I/data/zengyongwang/dtln_c/libs/tensorflow \
-  -I/root/flatbuffers/include \
-  -I/usr/include \
-  -L${TF_LIB_PATH} \        
-  -L/usr/lib64 \
-  -ltensorflow-lite \                 
-  -lsndfile \
-  -o debug
+mkdir -p "${BUILD}"
+
+echo "Configuring (AArch64 cross)..."
+CMAKE_ARGS=(
+  -S "${ROOT}"
+  -B "${BUILD}"
+  -DCMAKE_TOOLCHAIN_FILE="${ROOT}/toolchain-aarch64.cmake"
+  -DCMAKE_BUILD_TYPE=Release
+)
+if [ -n "${SYSROOT:-}" ]; then
+  CMAKE_ARGS+=( -DCMAKE_SYSROOT="${SYSROOT}" )
+fi
+
+cmake "${CMAKE_ARGS[@]}"
+cmake --build "${BUILD}" -j"$(nproc 2>/dev/null || echo 4)"
+
+echo "Build completed successfully."

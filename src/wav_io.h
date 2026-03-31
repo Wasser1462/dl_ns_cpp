@@ -1,9 +1,9 @@
-#ifndef RWWAV_H
-#define RWWAV_H
+#ifndef WAV_IO_H
+#define WAV_IO_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 struct WavHeader {
     char riffTag[4];
@@ -21,7 +21,7 @@ struct WavHeader {
     uint32_t dataLength;
 };
 
-bool readWav(const std::string& filename, WavHeader& header, std::vector<float>& audioData);
-bool writeWav(const std::string& filename, const WavHeader& header, const std::vector<float>& audioData);
+bool read_wav(const std::string& filename, WavHeader& header, std::vector<float>& audioData);
+bool write_wav(const std::string& filename, const WavHeader& header, const std::vector<float>& audioData);
 
 #endif

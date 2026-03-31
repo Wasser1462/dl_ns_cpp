@@ -1,5 +1,5 @@
-#include "RWwav.h"
-#include "dtln.h"
+#include "dtln_process.h"
+#include "wav_io.h"
 
 #include <cstring>
 #include <iostream>
@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
     WavHeader header;
     std::vector<float> inputAudio;
-    if (!readWav(argv[3], header, inputAudio) || inputAudio.empty()) {
+    if (!read_wav(argv[3], header, inputAudio) || inputAudio.empty()) {
         std::cerr << "Error reading WAV file" << std::endl;
         return 1;
     }
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 
     std::string outPath = (argc >= 5) ? argv[4] : "enhanced.wav";
 
-    if (!writeWav(outPath, outHeader, outputAudio)) {
+    if (!write_wav(outPath, outHeader, outputAudio)) {
         std::cerr << "Error writing WAV file" << std::endl;
         return 1;
     }

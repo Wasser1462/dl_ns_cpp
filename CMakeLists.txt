@@ -10,26 +10,10 @@ include_directories(
 
 add_executable(dtln
   src/main.cc
-  src/RWwav.cc
+  src/wav_io.cc
   src/dtln_process.cc
   src/sfft.cc
 )
-
-target_compile_definitions(dtln PRIVATE
-  TF_MAJOR_VERSION=2
-  TF_MINOR_VERSION=6
-  TF_PATCH_VERSION=0
-  TF_VERSION_SUFFIX=""
-)
-
-if(FULLY_STATIC)
-  set(BUILD_SHARED_LIBS OFF)
-  set(CMAKE_SKIP_RPATH TRUE)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  target_link_options(dtln PRIVATE -static -s)
-else()
-  target_link_options(dtln PRIVATE -static-libstdc++ -static-libgcc -s)
-endif()
 
 set(DTLN_LIB_DIR ${CMAKE_SOURCE_DIR}/libs)
 set(TFLITE_LIB ${DTLN_LIB_DIR}/libtensorflow-lite.a)
